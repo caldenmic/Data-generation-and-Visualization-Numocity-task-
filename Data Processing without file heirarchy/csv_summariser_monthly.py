@@ -3,10 +3,17 @@ import pandas as pd
 import numpy as np
 import os
 
+def append_to_csv(file_name, df):
+    if not os.path.exists(file_name):
+        df.to_csv(file_name, mode='a', index=False)
+    else:
+        df.to_csv(file_name, mode='a', index=False, header=False)
+
 try:
     os.remove("charge_point_and_station_summary.csv")
     os.remove("charge_point_summary.csv")
     os.remove("charge_station_summary.csv")
+    os.remove("weekend_and_weekday_summary.csv")
 except:
     pass
 
@@ -40,22 +47,7 @@ for i in range(1, 32):
     charge_point_summary = df_temp.groupby(['txn.chargePointId', 'date', 'day_of_the_week']).agg({'Total_amount_charged': 'sum', 'txn.deliveredWh': 'sum'}).reset_index()
     df_weekend_and_weekday = df_temp.groupby(['day_of_the_week']).agg({'Total_amount_charged': 'sum', 'txn.deliveredWh': 'sum'}).reset_index()
 
-    if not os.path.exists('charge_point_and_station_summary.csv'):
-        charge_point_and_station.to_csv('charge_point_and_station_summary.csv', mode='a', index=False)
-    else:
-        charge_point_and_station.to_csv('charge_point_and_station_summary.csv', mode='a', index=False, header=False)
-    
-    if not os.path.exists('charge_point_summary.csv'):
-        charge_point_summary.to_csv('charge_point_summary.csv', mode='a', index=False)
-    else:
-        charge_point_summary.to_csv('charge_point_summary.csv', mode='a', index=False, header=False)
-    
-    if not os.path.exists('charge_station_summary.csv'):
-        charge_station_summary.to_csv('charge_station_summary.csv', mode='a', index=False)
-    else:
-        charge_station_summary.to_csv('charge_station_summary.csv', mode='a', index=False, header=False)
-
-    if not os.path.exists('weekend_and_weekday_summary.csv'):
-        charge_station_summary.to_csv('weekend_and_weekday_summary.csv', mode='a', index=False)
-    else:
-        charge_station_summary.to_csv('weekend_and_weekday_summary.csv', mode='a', index=False, header=False)
+    append_to_csv('charge_point_and_station_summary.csv', charge_point_and_station)
+    append_to_csv('charge_point_summary.csv', charge_point_summary)
+    append_to_csv('charge_station_summary.csv', charge_station_summary)
+    append_to_csv('weekend_and_weekday_summary.csv', df_weekend_and_weekday)

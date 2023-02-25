@@ -3,6 +3,11 @@ import pandas as pd
 import numpy as np
 import os
 
+def append_to_csv(file_name, df):
+    if not os.path.exists(file_name):
+        df.to_csv(file_name, mode='a', index=False)
+    else:
+        df.to_csv(file_name, mode='a', index=False, header=False)
 
 years = [2022]
 months = ['Janurary', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -59,22 +64,7 @@ for year in years:
             charge_point_summary = df_temp.groupby(['txn.chargePointId', 'date', 'day_of_the_week']).agg({'Total_amount_charged': 'sum', 'txn.deliveredWh': 'sum'}).reset_index()
             df_weekend_and_weekday = df_temp.groupby(['day_of_the_week']).agg({'Total_amount_charged': 'sum', 'txn.deliveredWh': 'sum'}).reset_index()
 
-            if not os.path.exists(f'{year}\{month}\charge_point_and_station_summary_{year}_{month}.csv'):
-                charge_point_and_station.to_csv(f'{year}\{month}\charge_point_and_station_summary_{year}_{month}.csv', mode='a', index=False)
-            else:
-                charge_point_and_station.to_csv(f'{year}\{month}\charge_point_and_station_summary_{year}_{month}.csv', mode='a', index=False, header=False)
-            
-            if not os.path.exists(f'{year}\{month}\charge_point_summary_{year}_{month}.csv'):
-                charge_point_summary.to_csv(f'{year}\{month}\charge_point_summary_{year}_{month}.csv', mode='a', index=False)
-            else:
-                charge_point_summary.to_csv(f'{year}\{month}\charge_point_summary_{year}_{month}.csv', mode='a', index=False, header=False)
-            
-            if not os.path.exists(f'{year}\{month}\charge_station_summary_{year}_{month}.csv'):
-                charge_station_summary.to_csv(f'{year}\{month}\charge_station_summary_{year}_{month}.csv', mode='a', index=False)
-            else:
-                charge_station_summary.to_csv(f'{year}\{month}\charge_station_summary_{year}_{month}.csv', mode='a', index=False, header=False)
-
-            if not os.path.exists(f'{year}\{month}\weekend_and_weekday_summary_{year}_{month}.csv'):
-                df_weekend_and_weekday.to_csv(f'{year}\{month}\weekend_and_weekday_summary_{year}_{month}.csv', mode='a', index=False)
-            else:
-                df_weekend_and_weekday.to_csv(f'{year}\{month}\weekend_and_weekday_summary_{year}_{month}.csv', mode='a', index=False, header=False)
+            append_to_csv(f'{year}\{month}\charge_point_and_station_summary_{year}_{month}.csv', charge_point_and_station)
+            append_to_csv(f'{year}\{month}\charge_point_summary_{year}_{month}.csv', charge_point_summary)
+            append_to_csv(f'{year}\{month}\charge_station_summary_{year}_{month}.csv', charge_station_summary)
+            append_to_csv(f'{year}\{month}\weekend_and_weekday_summary_{year}_{month}.csv', df_weekend_and_weekday)
