@@ -16,7 +16,10 @@ except:
 # Process all the files one by one
 for i in range(1, 32):
     # Load datasets one at a time by their day
-    df_temp = pd.read_csv(f'day_{i}.csv')
+    try:
+        df_temp = pd.read_csv(f'day_{i}.csv')
+    except:
+        break
 
     # Clean the data frame
     df_temp = get_cleaned_DataFrame(df_temp)
