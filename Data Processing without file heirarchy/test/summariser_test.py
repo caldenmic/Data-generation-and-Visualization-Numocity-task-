@@ -66,11 +66,10 @@ class TestSummariser(unittest.TestCase):
             df_temp = get_cleaned_DataFrame(df_temp)
 
             summary = summary_function(df_temp)
-            # print(summary)
 
             append_to_csv(f'test\\{file_name}.csv', summary)
 
-    def test_create_charge_station_and_charge_point_summary(self):
+    def test_create_charge_point_and_station_point_summary(self):
         self.create_summary('test_charge_point_and_station_summary', get_charge_point_and_station_summary)
         self.assertTrue(os.path.exists('test\\test_charge_point_and_station_summary.csv'))
         self.delete_summary_file('test_charge_point_and_station_summary')
@@ -142,7 +141,7 @@ class TestSummariser(unittest.TestCase):
 
         expected_summary = pd.read_csv("test\\test_charge_point_and_station_summary.csv")
 
-        self.assertTrue(summary.equals(expected_summary))
+        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
 
         self.delete_summary_file("test_charge_point_and_station_summary")
 
@@ -166,7 +165,7 @@ class TestSummariser(unittest.TestCase):
 
         expected_summary = pd.read_csv("test\\test_charge_station_summary.csv")
 
-        self.assertTrue(summary.equals(expected_summary))
+        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
 
         self.delete_summary_file("test_charge_station_summary")
 
@@ -190,7 +189,7 @@ class TestSummariser(unittest.TestCase):
 
         expected_summary = pd.read_csv("test\\test_charge_point_summary.csv")
 
-        self.assertTrue(summary.equals(expected_summary))
+        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
 
         self.delete_summary_file("test_charge_point_summary")
 
@@ -214,7 +213,7 @@ class TestSummariser(unittest.TestCase):
         expected_summary = pd.read_csv("test\\test_weekend_and_weekday_summary.csv")
         expected_summary = expected_summary.sort_values('day_of_the_week').reset_index().drop(columns=['index'])
 
-        self.assertTrue(summary.equals(expected_summary))
+        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
 
         self.delete_summary_file("test_weekend_and_weekday_summary")
 

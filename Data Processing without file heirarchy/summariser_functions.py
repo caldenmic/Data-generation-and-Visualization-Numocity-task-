@@ -39,7 +39,8 @@ def get_cleaned_DataFrame(df):
     'inv.identifier', 'inv.accountId', 'inv.currency', 'inv.description', 'inv.entryType', 'inv.userName', 'inv.status', 'inv.invoiceType'], inplace=True)
 
     df['Total_amount_charged'] = df['txn.totalAmount'] + df['txn.totalTax']
-    df['date'] = df['txn.updatedAtTime'].apply(lambda x: x[:10])
+    df['date'] = df['txn.createdAtTime'].apply(lambda x: x[:10])
+    # df['date'] = df['txn.updatedAtTime'].apply(lambda x: x[:10])
     df['day_of_the_week'] = pd.to_datetime(df['date']).dt.strftime('%A')
     # df['txn.deliveredWh'] = df['txn.deliveredWh'] / 1000
     
