@@ -138,10 +138,12 @@ class TestSummariser(unittest.TestCase):
 
         summary = get_charge_point_and_station_summary(df_test)
         summary = summary.sort_values('date').reset_index().drop(columns=['index'])
+        summary = summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
         expected_summary = pd.read_csv("test\\test_charge_point_and_station_summary.csv")
+        expected_summary = expected_summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
-        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
+        self.assertTrue(summary.equals(expected_summary))
 
         self.delete_summary_file("test_charge_point_and_station_summary")
 
@@ -162,10 +164,12 @@ class TestSummariser(unittest.TestCase):
 
         summary = get_charge_station_summary(df_test)
         summary = summary.sort_values('date').reset_index().drop(columns=['index'])
+        summary = summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
         expected_summary = pd.read_csv("test\\test_charge_station_summary.csv")
+        expected_summary = expected_summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
-        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
+        self.assertTrue(summary.equals(expected_summary))
 
         self.delete_summary_file("test_charge_station_summary")
 
@@ -186,10 +190,12 @@ class TestSummariser(unittest.TestCase):
 
         summary = get_charge_point_summary(df_test)
         summary = summary.sort_values('date').reset_index().drop(columns=['index'])
+        summary = summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
         expected_summary = pd.read_csv("test\\test_charge_point_summary.csv")
+        expected_summary = expected_summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
-        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
+        self.assertTrue(summary.equals(expected_summary))
 
         self.delete_summary_file("test_charge_point_summary")
 
@@ -209,11 +215,13 @@ class TestSummariser(unittest.TestCase):
         df_test = get_cleaned_DataFrame(df_test)
 
         summary = get_weekend_and_weekday_summary(df_test)
+        summary = summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
         expected_summary = pd.read_csv("test\\test_weekend_and_weekday_summary.csv")
         expected_summary = expected_summary.sort_values('day_of_the_week').reset_index().drop(columns=['index'])
+        expected_summary = expected_summary.round({'Total_amount_charged': 10, 'txn.deliveredWh': 10})
 
-        pd.testing.assert_frame_equal(left=summary, right=expected_summary)
+        self.assertTrue(summary.equals(expected_summary))
 
         self.delete_summary_file("test_weekend_and_weekday_summary")
 
