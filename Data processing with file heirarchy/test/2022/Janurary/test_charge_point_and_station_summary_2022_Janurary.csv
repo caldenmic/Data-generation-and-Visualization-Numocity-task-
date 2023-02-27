@@ -1,0 +1,7 @@
+txn.chargeStationCity,txn.chargePointId,date,day_of_the_week,Total_amount_charged,txn.deliveredWh
+Bangalore,qw23521,2022-01-01,Saturday,4.7068,1455
+Mysore,uy26932,2022-01-01,Saturday,6.8633999999999995,2839
+Bangalore,ga23521,2022-01-02,Sunday,5.3546,2557
+Mysore,uy26932,2022-01-02,Sunday,6.8142000000000005,1297
+Chennai,mq18481,2022-01-03,Monday,7.9458,1870
+Mysore,uy26932,2022-01-03,Monday,2.8864,1191

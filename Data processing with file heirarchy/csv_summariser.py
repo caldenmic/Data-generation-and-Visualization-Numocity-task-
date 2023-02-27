@@ -1,8 +1,14 @@
 # Importing the files
-import pandas as pd
 import numpy as np
 import os
 from summariser_functions import *
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+import pandas as pd
+
+pd.reset_option('all')
 
 years = [2022]
 months = ['Janurary', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -12,39 +18,42 @@ month_map = {'Janurary': 1, 'Feburary': 2, 'March': 3, 'April': 4, 'May': 5, 'Ju
 
 path = os.getcwd()
 
+# Summary file names
+charge_point_and_station_summary_file_name = 'charge_point_and_station_summary'
+weekend_and_weekday_summary_file_name = 'weekend_and_weekday_summary'
+
 for year in years:
     year_directory = os.path.join(path, str(year))
     for month in months:
         month_directory = os.path.join(year_directory, month)
         
+        if not os.path.exists(month_directory):
+            print(f"{month} directory not present")
+            continue
+        
         # Initially remove the existing summarised csv files
         try:
-            os.remove(f"{year}\{month}\charge_point_and_station_summary_{year}_{month}.csv")
-            os.remove(f"{year}\{month}\charge_point_summary_{year}_{month}.csv")
-            os.remove(f"{year}\{month}\charge_station_summary_{year}_{month}.csv")
-            os.remove(f"{year}\{month}\weekend_and_weekday_summary_{year}_{month}.csv")
+            summary_file = pd.read_csv(f"{year}\{month}\{charge_point_and_station_summary_file_name}_{year}_{month}.csv")
+            day_to_start_processing = int(summary_file['date'].iloc[-1].split('-')[-1]) + 1
+            print(day_to_start_processing)
         except:
-            pass
+            day_to_start_processing = 1
+            print(day_to_start_processing)
         
-        for day in range(1, days[month_map[month] - 1] + 1):
-            
+        for day in range(day_to_start_processing, days[month_map[month] - 1] + 1):
+
             # Load datasets one at a time by their day
             try:
                 df_temp = pd.read_csv(f'{year}\{month}\day_{day}.csv')
             except:
-                continue
+                # number_of_days holds the number of daily csv files present in a month's directory excluding the number of summary_files
+                number_days_data = len(os.listdir(f'{year}\{month}')) - 2
+                print(f"{month} directory has {number_days_data} day/days data")
+                break
 
             # Get cleaned Data Frame
             df_temp = get_cleaned_DataFrame(df_temp)
 
-            # Create multiple dataframes suitable for plotting different columns
-            charge_point_and_station = get_charge_point_and_station_summary(df_temp)
-            charge_station_summary = get_charge_station_summary(df_temp)
-            charge_point_summary = get_charge_point_summary(df_temp)
-            df_weekend_and_weekday = get_weekend_and_weekday_summary(df_temp)
-
-            # Generate csv files with summarise different types of data required
-            append_to_csv(f'{year}\{month}\charge_point_and_station_summary_{year}_{month}.csv', charge_point_and_station)
-            append_to_csv(f'{year}\{month}\charge_point_summary_{year}_{month}.csv', charge_point_summary)
-            append_to_csv(f'{year}\{month}\charge_station_summary_{year}_{month}.csv', charge_station_summary)
-            append_to_csv(f'{year}\{month}\weekend_and_weekday_summary_{year}_{month}.csv', df_weekend_and_weekday)
+            # Create multiple summary files
+            get_summary(df_temp, get_charge_point_and_station_summary, charge_point_and_station_summary_file_name, year, month)
+            get_summary(df_temp, get_weekend_and_weekday_summary, weekend_and_weekday_summary_file_name, year, month, append_weekday_and_weekend_summary_to_csv)

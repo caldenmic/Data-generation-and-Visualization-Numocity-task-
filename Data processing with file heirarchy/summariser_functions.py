@@ -1,21 +1,22 @@
 # Importing the files
+import warnings
 import pandas as pd
 import numpy as np
 import os
 
-def append_to_csv(file_name, df):
+def append_to_csv(file_path, current_summary_data):
     """
     append_to_csv appends the data frame to the csv file if it exists otherwise it creates a new csv file
 
-    :file_name: name of the csv file
-    :df: Data Frame to be appended to the csv file
+    :file_path: name of the csv file
+    :current_summary_data: Data Frame to be appended to the csv file
     :return: returns nothing
     """ 
 
-    if not os.path.exists(file_name):
-        df.to_csv(file_name, mode='a', index=False)
+    if not os.path.exists(file_path):
+        current_summary_data.to_csv(file_path, mode='a', index=False)
     else:
-        df.to_csv(file_name, mode='a', index=False, header=False)
+        current_summary_data.to_csv(file_path, mode='a', index=False, header=False)
 
 def get_cleaned_DataFrame(df):
     """
@@ -38,7 +39,7 @@ def get_cleaned_DataFrame(df):
     'txn.stopRequest.sessionId', 'txn.stopRequest.origin', 'txn.stopRequest.reason', 'txn.stopRequest.messageId', 'txn.chargeStationId', 
     'inv.identifier', 'inv.accountId', 'inv.currency', 'inv.description', 'inv.entryType', 'inv.userName', 'inv.status', 'inv.invoiceType'], inplace=True)
 
-    df['Total_amount_charged'] = df['txn.totalAmount'] + df['txn.totalTax']
+    df['Total_amount_charged'] = df['txn.totalAmount'] - df['txn.totalTax']
     df['date'] = df['txn.createdAtTime'].apply(lambda x: x[:10])
     # df['date'] = df['txn.updatedAtTime'].apply(lambda x: x[:10])
     df['day_of_the_week'] = pd.to_datetime(df['date']).dt.strftime('%A')
@@ -89,3 +90,43 @@ def get_weekend_and_weekday_summary(df):
 
     df = df.groupby(['day_of_the_week']).agg({'Total_amount_charged': 'sum', 'txn.deliveredWh': 'sum'}).reset_index()
     return df
+
+def append_weekday_and_weekend_summary_to_csv(file_path, current_summary_data):
+    """
+    append_weekday_and_weekend_summary_to_csv re-calculates the Total_amount_charges and txn.deliveredWh for each day of the week
+    based on the current day's summary that is given
+
+    :file_path: path of the weekend and weekday trends csv file
+    :current_summary_data: Current day's summary data
+    :return: returns nothing
+    """ 
+
+    if not os.path.exists(file_path):
+        current_summary_data.to_csv(file_path, mode='a', index=False)
+    else:
+        previous_summary_data = pd.read_csv(file_path)
+
+        for i, row in current_summary_data.iterrows():
+            if row['day_of_the_week'] in previous_summary_data['day_of_the_week'].values:
+                previous_summary_data.loc[previous_summary_data['day_of_the_week'] == row['day_of_the_week'], ['Total_amount_charged', 'txn.deliveredWh']] += row[['Total_amount_charged', 'txn.deliveredWh']]
+            else:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=FutureWarning)
+                    previous_summary_data = previous_summary_data.append(row, ignore_index=True)
+        previous_summary_data.to_csv(file_path, index=False)
+
+def get_summary(df, summariser_function, summary_file_name, year, month, appending_function=append_to_csv):
+    """
+    get_summary it acts as a general intermediate function to get the summary that is required
+
+    :df: it is the data frame whose summary has to be generated
+    :summariser_function: it is a function which takes data frame as the argument and creates summary for that data frame  
+    :summary_file_name: gives the name of the summary file
+    :year: gives the name of the year's directory
+    :month: gives the name of the month's directory
+    :appending_function: it is a function used to append data to the summarised csv file
+    :return: returns nothing
+    """ 
+
+    summarised_data = summariser_function(df)
+    appending_function(f'{year}\{month}\{summary_file_name}_{year}_{month}.csv', summarised_data)
